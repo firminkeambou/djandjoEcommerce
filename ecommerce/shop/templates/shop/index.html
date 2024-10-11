@@ -1,0 +1,222 @@
+
+{% load static %}  <!-- This line load static files like CSS file-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+-->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    
+    <link rel="stylesheet" href="{% static 'shop/style.css' %}">
+    <title>shopApp</title>
+</head>
+<body onload="getCartNumberItems()">
+
+<div class="container">
+      <div class="row">
+        <div class="col-md-12">
+
+          <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">Navbar</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+              <ul class="navbar-nav">
+                <li class="nav-item active">
+                  <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a> <!-- sr-only stands for "screen reader" -->
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#">Features</a>
+                </li>
+                <li class="nav-item">
+                     <button type="button" id="cart"  data-html="true" class="btn btn-secondary" data-container="body" data-toggle="popover" data-placement="bottom" data-content="Vivamus
+                     sagittis lacus vel augue laoreet rutrum faucibus.">
+                     Cart(0)
+                    </button>
+                 
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link disabled" href="#">Disabled</a>
+                </li>
+              </ul>
+          </div>
+        </nav>
+        </div>
+      </div>
+    
+      <div class="row" >
+         <div class="col-md-12">
+            <form class="card card-sm" method="GET" action="">
+              {% csrf_token %}
+                <div class="card-body row no-gutter align-items-center">
+                    <div class='col'>
+                      <input type="search" class="form-control form-control-borderless" name="product_name" placeholder="Search for products">
+                    </div>
+                    <div class='col-auto'>
+                        <button type="submit" class="btn btn-success">Search</button>
+                    </div>
+                </div>
+              </form>
+         </div>
+      </div>
+    
+     <h1>List of Products</h1>
+    <div class="row"> 
+     
+     {%  for product in products_list        %}
+    
+    
+      <div class="col-md-3  my-2"> <!-- on a medium device we need offset of 2 {{item.item_image}}-->
+       <!-- <img class="card" height="150px" src=" {% static 'shop/images/burger.jpg' %}" />  (this is for local and static images)-->
+         
+       <div class='card'>
+          <img class="card-img-top" height="150px" width='200px' src=" {{product.image}}" />
+          <div class="card-body">
+            <div id="nm_{{product.id}}" class="card-title">
+                 {{product.title}}
+            </div>
+            <div class="card-text">
+              $ {{product.price}}
+            </div>
+            <a href="{% url 'shop:detail' product.id  %}" class="btn btn-warning">View</a>
+            <button class="btn atc btn-warning" id="{{product.id}}">Add to card</button>           
+          </div>
+        </div>
+       
+          
+      </div>
+      {% endfor %}
+    </div>
+        <div class="row">
+          <div class="col-md-3 offset-md-4">
+            <ul class="pagination">
+                        {%if products_list.has_previous %}
+                          <li class="page-item">
+                            <!--<a href="?page=1" >First</a>-->
+                            <a class="page-link" href="?page={{products_list.previous_page_number}}" >Previous</a>
+                          </li>
+
+                        {%endif%}
+                          <li class="page-item active">
+                            <a class="page-link" href="?page={{products_list.number}}">Current </a>
+                          </li>
+      
+                        {%if  products_list.has_next%}
+                          <li class="page-item">
+                            <a class="page-link" href="?page={{products_list.next_page_number}}" >Next</a>
+                            <!--<a href="?page={{products_list.paginator.num_pages}}" >Last</a>--> <!--num_pages gives the total number of pages-->
+                          </li>
+        
+                       {%endif%}
+            </ul>
+          </div>
+
+        </div>
+ </div>
+     
+</body>
+<script type="text/javascript">
+
+    /* $(document).ready(function(){
+      console.log("hello world")
+    })*/
+
+  
+  if (localStorage.getItem('cart')==null){
+    var cart = {}  // very important to use "var" here so, the variable remains global instead of let which creates a block scope
+    var totalItemsInCart = 0;  //initializing the total Item variables
+   // localStorage.setItem('cart',cart)
+    
+  } else{
+     cart = JSON.parse(localStorage.getItem('cart') ) // this returns an object as a json object
+    
+     totalItemsInCart = 0; //initializing the total Item variables
+     for (const keyy in cart) {
+      totalItemsInCart += cart[keyy] ;
+    }
+ }
+
+ // the following code state : " on click in the class named ".atc", execute the function that follows
+ //  $()  = jquery
+  
+  $(document).on('click','.atc', function() {  //click on the element which class name is "atc"
+    let item_id = this.id;
+    console.log(`Item  ${item_id} is added following the click  on "Add to cart button" `)
+    //below, we are accessing a json object, so we will be using the pair ('key','value')
+    //item_id down below will represent th key
+    if (cart[item_id]!=undefined) {
+            cart[item_id] +=1 ;
+
+    } else {
+      cart[item_id]=1 ;
+    }
+    totalItemsInCart +=1 ;
+    console.log(`Items added sofar ${JSON.stringify(cart)} `)
+    //adding cart to localStorage
+    localStorage.setItem('cart',JSON.stringify(cart))
+    // getting the length of the cart 
+    console.log(`number of different objects is : ${Object.keys(cart).length}`)  // this counts the number of distinct keys --Object is actually a function in javascript
+    
+    //getting the total number of items in the cart instead of the number of keys
+
+    
+
+    console.log(`Total items ${totalItemsInCart}`)
+    //document.getElementById("cart").innerHTML = "Cart("+Object.keys(cart).length+")"  // this was when we only counted keys
+    document.getElementById("cart").innerHTML = "Cart("+totalItemsInCart+")"; // change main html upon  "click"
+
+    // updating detail element in the cart
+    document.getElementById("cart").setAttribute('data-content',`${DisplayCart(cart)}`)
+  })
+
+    //get cart data onLoading page
+
+  function getCartNumberItems() {
+     //document.getElementById("cart").innerHTML = "Cart("+Object.keys(cart).length+")"; // this was when we only counted keys
+
+     document.getElementById("cart").innerHTML = "Cart("+totalItemsInCart+")";
+    }
+  
+  /*$(function () {
+  $('[data-toggle="popover"]').popover();
+  document.getElementById("cart").setAttribute('data-content','<h5>This is your card </h5>')
+})*/
+
+$(function () {
+   document.getElementById("cart").setAttribute('data-content',`${DisplayCart(cart)}`)
+  $('[data-toggle="popover"]').popover();
+ 
+})
+
+function DisplayCart(cart) {
+  cartContent=''
+  data = Object.entries(cart) // returns an array of array(key/value)
+  for (let i = 0; i < data.length; i++){ //data[i][0] = key;  data[i][1] = value
+   // descItem  = $(`#nm_${data[i][0]}`).text().trim() +'\n' ; //for normal print
+    descItem  = $(`#nm_${data[i][0]}`).text().trim()  ;   //for web browser print
+    //cartContent += `item id ${data[i][0]} : ${data[i][1]} ${descItem}` (work fine  and include item id)
+    cartContent += ` <b><i>${descItem} </i></b>,  Qty:  <b class="cartitems">${data[i][1]} </b> <br> `;
+    //console.log( data[i][1]) 
+   //console.log(document.getElementById(`nm_${data[i][0]}`).innerHTML)  //basic javascript syntax (work fine)
+   //console.log($(`#nm_${data[i][0]}`).text())   jquery syntax  (work fine)
+  
+  }
+  return cartContent;
+}
+DisplayCart(cart)
+ // console.log(document.getElementById("nm_1").innerHTML)
+</script>
+<style>
+  .cartitems {
+    color: green;
+  }
+</style>
+</html>
